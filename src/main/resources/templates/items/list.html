@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Items - Clothes Warehouse</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="fas fa-warehouse me-2"></i>Clothes Warehouse
+            </a>
+            
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/items">
+                            <i class="fas fa-list me-1"></i>Items
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN') or hasRole('WAREHOUSE_EMPLOYEE')">
+                        <a class="nav-link" href="/items/add">
+                            <i class="fas fa-plus me-1"></i>Add Item
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link" href="/items/admin">
+                            <i class="fas fa-cog me-1"></i>Admin Panel
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i><span sec:authentication="name">User</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/logout">
+                                <i class="fas fa-sign-out-alt me-1"></i>Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4><i class="fas fa-list me-2"></i>Items Inventory</h4>
+                        <div>
+                            <a href="/items/add" class="btn btn-success btn-sm me-2" sec:authorize="hasRole('ADMIN') or hasRole('WAREHOUSE_EMPLOYEE')">
+                                <i class="fas fa-plus me-1"></i>Add Item
+                            </a>
+                            <a href="/items/admin" class="btn btn-warning btn-sm" sec:authorize="hasRole('ADMIN')">
+                                <i class="fas fa-cog me-1"></i>Admin Panel
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Filters and Controls -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <form method="get" action="/items/filter" class="d-flex">
+                                    <select name="brand" class="form-select me-2">
+                                        <option value="">Filter by Brand</option>
+                                        <option th:each="brand : ${brands}" 
+                                                th:value="${brand}" 
+                                                th:text="${brand.displayName}"
+                                                th:selected="${selectedBrand == brand}">
+                                        </option>
+                                    </select>
+                                    <button type="submit" class="btn btn-outline-primary">
+                                        <i class="fas fa-filter me-1"></i>Filter
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <div class="btn-group" role="group">
+                                    <a th:href="@{/items(sortByBrand=false)}" 
+                                       class="btn btn-outline-secondary"
+                                       th:classappend="${!sortByBrand} ? 'active' : ''">
+                                        <i class="fas fa-sort-numeric-down me-1"></i>Sort by ID
+                                    </a>
+                                    <a th:href="@{/items(sortByBrand=true)}" 
+                                       class="btn btn-outline-secondary"
+                                       th:classappend="${sortByBrand} ? 'active' : ''">
+                                        <i class="fas fa-sort-alpha-down me-1"></i>Sort by Brand
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Items Table -->
+                        <div th:if="${#lists.isEmpty(items)}" class="text-center py-5">
+                            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No items found</h5>
+                            <p class="text-muted" th:if="${filtered}">Try adjusting your filter criteria.</p>
+                            <p class="text-muted" th:unless="${filtered}">Start by adding some items to your inventory.</p>
+                            <a href="/items/add" class="btn btn-primary" sec:authorize="hasRole('ADMIN') or hasRole('WAREHOUSE_EMPLOYEE')">
+                                <i class="fas fa-plus me-1"></i>Add First Item
+                            </a>
+                        </div>
+
+                        <div th:if="${!#lists.isEmpty(items)}">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Brand</th>
+                                            <th>Year</th>
+                                            <th>Price</th>
+                                            <th>Quantity</th>
+                                            <th>Total Value</th>
+                                            <th sec:authorize="hasRole('ADMIN')">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="item : ${items}">
+                                            <td th:text="${item.id}"></td>
+                                            <td>
+                                                <strong th:text="${item.name}"></strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary" th:text="${item.brand.displayName}"></span>
+                                            </td>
+                                            <td th:text="${item.yearOfCreation}"></td>
+                                            <td class="text-success">
+                                                <strong>$<span th:text="${#numbers.formatDecimal(item.price, 0, 2)}"></span></strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info" th:text="${item.quantity}"></span>
+                                            </td>
+                                            <td class="text-success">
+                                                <strong>$<span th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 2)}"></span></strong>
+                                            </td>
+                                            <td sec:authorize="hasRole('ADMIN')">
+                                                <form method="post" th:action="@{/items/delete/{id}(id=${item.id})}" 
+                                                      style="display: inline;"
+                                                      onsubmit="return confirm('Are you sure you want to delete this item?')">
+                                                    <button type="submit" class="btn btn-danger btn-sm">
+                                                        <i class="fas fa-trash me-1"></i>Delete
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            <div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center mt-3">
+                                <div>
+                                    <small class="text-muted">
+                                        Showing <span th:text="${#lists.size(items)}"></span> of <span th:text="${totalItems}"></span> items
+                                    </small>
+                                </div>
+                                <nav>
+                                    <ul class="pagination pagination-sm mb-0">
+                                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/items(page=${currentPage - 1}, sortByBrand=${sortByBrand})}">Previous</a>
+                                        </li>
+                                        <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                                            class="page-item" 
+                                            th:classappend="${i == currentPage} ? 'active'">
+                                            <a class="page-link" th:href="@{/items(page=${i}, sortByBrand=${sortByBrand})}" th:text="${i + 1}"></a>
+                                        </li>
+                                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                            <a class="page-link" th:href="@{/items(page=${currentPage + 1}, sortByBrand=${sortByBrand})}">Next</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

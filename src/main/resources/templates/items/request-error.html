@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Error - Clothes Warehouse</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">
+                <i class="fas fa-warehouse me-2"></i>Clothes Warehouse
+            </a>
+            
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/items">
+                            <i class="fas fa-list me-1"></i>Items
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/items/add">
+                            <i class="fas fa-plus me-1"></i>Add Item
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/items/admin">
+                            <i class="fas fa-cog me-1"></i>Admin Panel
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i><span sec:authentication="name">Admin</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/logout">
+                                <i class="fas fa-sign-out-alt me-1"></i>Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h4><i class="fas fa-exclamation-triangle me-2"></i>Item Request Failed</h4>
+                    </div>
+                    <div class="card-body text-center">
+                        <i class="fas fa-times-circle fa-5x text-danger mb-4"></i>
+                        <h3 class="text-danger mb-3">Stock Cannot Be Replenished</h3>
+                        <p class="lead mb-4">
+                            The requested item is not available in any of our distribution centres, 
+                            or there was an error processing your request.
+                        </p>
+                        
+                        <div class="alert alert-warning">
+                            <h6><i class="fas fa-info-circle me-2"></i>Possible Reasons:</h6>
+                            <ul class="list-unstyled mb-0">
+                                <li>• Item is out of stock in all distribution centres</li>
+                                <li>• Item name or brand doesn't match exactly</li>
+                                <li>• Network connectivity issues</li>
+                                <li>• System maintenance in progress</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <a href="/items/admin" class="btn btn-primary me-2">
+                                <i class="fas fa-arrow-left me-1"></i>Back to Admin Panel
+                            </a>
+                            <a href="/items/add" class="btn btn-success">
+                                <i class="fas fa-plus me-1"></i>Add Item Manually
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
